@@ -12,8 +12,7 @@ ARG DOMAIN=0.0.0.0
 ARG PORT=3000
 # Should usually stay 0.0.0.0 because of the way fastify and Docker interact.
 ARG HOST=0.0.0.0
-# Make this whatever the name of the redis service is.
-ARG REDIS_URL=sessions_store 
+
 
 ENV NODE_ENV=${NODE_ENV} \
   LOG_LEVEL=${LOG_LEVEL} \
