@@ -1,19 +1,47 @@
 {
-  "name": "nmap-public-api",
-  "version": "1.0.0",
-  "description": "Public facing api for the naloxone map project.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/baremaximum/nmap-public-api.git"
-  },
-  "author": "Charles Desbiens",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/baremaximum/nmap-public-api/issues"
-  },
-  "homepage": "https://github.com/baremaximum/nmap-public-api#readme"
+    "name": "nmap-public-api",
+    "version": "1.0.0",
+    "description": "Public facing api for the naloxone map project.",
+    "main": "index.js",
+    "scripts": {
+        "start:build": "tsc -w",
+        "start:run": "nodemon dist/index.js",
+        "start": "concurrently npm:start:*",
+        "test": "NODE_ENV=test LOG_LEVEL=debug npx jest --verbose --runInBand --watchAll --detectOpenHandles"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/baremaximum/nmap-public-api.git"
+    },
+    "author": "Charles Desbiens",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/baremaximum/nmap-public-api/issues"
+    },
+    "homepage": "https://github.com/baremaximum/nmap-public-api#readme",
+    "dependencies": {
+        "docker-secret": "^1.1.2",
+        "fastify": "^2.14.1",
+        "fastify-blipp": "^2.3.1",
+        "fastify-formbody": "^3.2.0",
+        "fastify-helmet": "^3.0.2",
+        "fastify-mongodb": "^2.0.0",
+        "fastify-plugin": "^1.6.1",
+        "mongodb": "^3.5.7"
+    },
+    "devDependencies": {
+        "@types/mongodb": "^3.5.18",
+        "@types/node": "^14.0.4",
+        "@typescript-eslint/eslint-plugin": "^2.34.0",
+        "@typescript-eslint/parser": "^2.34.0",
+        "concurrently": "^5.2.0",
+        "eslint": "^7.0.0",
+        "eslint-config-prettier": "^6.11.0",
+        "jest": "^26.0.1",
+        "nodemon": "^2.0.4",
+        "npx": "^10.2.2",
+        "prettier": "^2.0.5",
+        "ts-jest": "^26.0.0",
+        "typescript": "^3.9.3"
+    }
 }
