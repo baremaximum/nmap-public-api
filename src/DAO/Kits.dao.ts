@@ -1,7 +1,7 @@
 import { Collection, AggregationCursor } from "mongodb";
 
 export interface Location {
-  type: string;
+  type: string; // Point. GEOjson field.
   coordinates: [number, number];
   address: string;
   city: string;
@@ -34,7 +34,7 @@ export class Kits {
   public static getByCoordinates(
     lon: number,
     lat: number
-  ): AggregationCursor<Kit[]> {
+  ): AggregationCursor<Kit> {
     /* Finds all kits whose location is within 500 meters of the specified point.*/
 
     const pipeline = [
