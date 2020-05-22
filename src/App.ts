@@ -2,12 +2,12 @@ import fastify from "fastify";
 import { Server, IncomingMessage, ServerResponse } from "http";
 import { secrets } from "docker-secret";
 // routes
+import { GetKitsRoute } from "./routes/getKits.route";
 import { HealthCheckRoute } from "./routes/healthcheck.route";
 // plugins
 import fastifyBlipp from "fastify-blipp";
 import fastifyHelmet from "fastify-helmet";
 import fastifyMongodb from "fastify-mongodb";
-import fastifyFormBody from "fastify-formbody";
 // DAO
 import { Kits } from "./DAO/Kits.dao";
 
@@ -43,8 +43,6 @@ export class App {
   }
 
   public registerPlugins(): void {
-    // form body
-    this.server.register(fastifyFormBody);
     // blipp
     this.server.register(fastifyBlipp);
     // helmet

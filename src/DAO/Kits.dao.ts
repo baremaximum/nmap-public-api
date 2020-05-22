@@ -33,9 +33,10 @@ export class Kits {
 
   public static getByCoordinates(
     lon: number,
-    lat: number
+    lat: number,
+    radiusMeters: number
   ): AggregationCursor<Kit> {
-    /* Finds all kits whose location is within 500 meters of the specified point.*/
+    /* Finds all kits whose location is within specified radius of the specified point.*/
 
     const pipeline = [
       {
@@ -43,7 +44,7 @@ export class Kits {
           near: { type: "Point", coordinates: [lon, lat] },
           distanceField: "dist.calculated",
           query: { upToDate: true },
-          maxDistance: 500,
+          maxDistance: radiusMeters,
         },
       },
     ];

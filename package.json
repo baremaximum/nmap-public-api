@@ -20,6 +20,7 @@
     },
     "homepage": "https://github.com/baremaximum/nmap-public-api#readme",
     "dependencies": {
+        "@types/jest": "^25.2.3",
         "docker-secret": "^1.1.2",
         "fastify": "^2.14.1",
         "fastify-blipp": "^2.3.1",

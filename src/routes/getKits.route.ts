@@ -1,11 +1,17 @@
 import { RouteOptions } from "fastify";
 import { getKitsHandler } from "../handlers/getKits.handler";
 
-export const KitsRoute: RouteOptions = {
+export const GetKitsRoute: RouteOptions = {
   method: "GET",
   url: "/kits",
   logLevel: process.env.LOG_LEVEL,
   schema: {
+    querystring: {
+      required: ["lon", "lat", "radius"],
+      lon: { type: "number", minValue: -180, maxValue: 180 },
+      lat: { type: "number", minValue: -90, maxValue: 90 },
+      radius: { type: "number", maxValue: 5000, minValue: 100 },
+    },
     response: {
       404: {
         type: "string",

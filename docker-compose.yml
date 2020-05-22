@@ -1,0 +1,29 @@
+version: "3.6"
+
+services:
+  api:
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+        - LOG_LEVEL=debug
+    environment:
+      DOMAIN: "0.0.0.0"
+      HOST: "0.0.0.0"
+    expose:
+      - "3000"
+    command: ["npm", "run", "start"]
+    volumes:
+      - "./:/app"
+    secrets:
+      - db_url # Secret to keep username/password out of repo/image
+
+  mongodb:
+    image: mongo:4.2.0
+    ports:
+      - "27017:27017"
+    environment: { AUTH: "no" }
+
+secrets:
+  db_url:
+    file: ./db_url.txt # Point to mongodb service name defined here
