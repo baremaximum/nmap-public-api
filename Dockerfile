@@ -38,5 +38,5 @@ EXPOSE 3000
 USER node
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]
 
