@@ -64,7 +64,7 @@ describe("/kits", () => {
         method: "GET",
         url: {
           pathname: "/kits",
-          query: { lat: "-181", lon: "50", radius: "1000" },
+          query: { lat: "-91", lon: "50", radius: "1000" },
         },
       };
 
@@ -72,6 +72,91 @@ describe("/kits", () => {
       expect(response.statusCode).toEqual(400);
       expect(JSON.parse(response.payload).message).toEqual(
         "querystring.lat should be >= -90"
+      );
+      done();
+    });
+
+    it("Should respond with an error if lon less than minimum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "50", lon: "-181", radius: "1000" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.lon should be >= -180"
+      );
+      done();
+    });
+
+    it("Should respond with an error if radius less than minimum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "50", lon: "50", radius: "99" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.radius should be >= 100"
+      );
+      done();
+    });
+
+    it("Should respond with an error if lat more than maximum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "91", lon: "50", radius: "1000" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.lat should be <= 90"
+      );
+      done();
+    });
+
+    it("Should respond with an error if lon more than maximum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "50", lon: "181", radius: "1000" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.lon should be <= 180"
+      );
+      done();
+    });
+
+    it("Should respond with an error if radius more than maximum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "50", lon: "180", radius: "1501" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.radius should be <= 1500"
       );
       done();
     });
