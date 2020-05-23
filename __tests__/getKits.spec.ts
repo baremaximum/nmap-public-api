@@ -1,6 +1,7 @@
 import { Kits } from "../src/DAO/Kits.dao";
 import { App } from "../src/App";
 import { HTTPInjectOptions } from "fastify";
+import fs from "fs";
 
 describe("/kits", () => {
   let app = new App();
@@ -161,4 +162,6 @@ describe("/kits", () => {
       done();
     });
   });
+
+  describe("tests with data", () => {});
 });

@@ -11,6 +11,7 @@ export interface Location {
 }
 
 export interface Kit {
+  _id: string;
   location: Location;
   lastVerified: Date;
   openingHours: string;
