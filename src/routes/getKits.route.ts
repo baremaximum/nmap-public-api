@@ -11,7 +11,7 @@ export const GetKitsRoute: RouteOptions = {
       type: "object",
       properties: {
         lon: { type: "number", minimum: -180, maximum: 180 },
-        lat: { type: "number", minValue: -90, maximum: 90 },
+        lat: { type: "number", minimum: -90, maximum: 90 },
         radius: { type: "number", minimum: 100, maximum: 2500 },
       },
     },

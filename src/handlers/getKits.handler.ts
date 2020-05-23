@@ -3,7 +3,6 @@ import { Kits } from "../DAO/Kits.dao";
 import { FastifyRequest, FastifyReply } from "fastify";
 
 export async function getKitsHandler(
-  this: any, // Need to fool typscript compiler. Gives access to logger on the App object.
   request: FastifyRequest,
   response: FastifyReply<ServerResponse>
 ) {
@@ -21,7 +20,7 @@ export async function getKitsHandler(
     }
   } catch (e) {
     // Catch and log mongodb errors.
-    this.server.log.error(e);
+    console.error(e);
     response.status(500).send("Server error");
   }
 }

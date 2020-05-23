@@ -46,6 +46,7 @@ export class App {
         reply.status(400).send(error);
         return;
       }
+      console.error(error);
       reply.status(500).send("Server Error");
     });
   }

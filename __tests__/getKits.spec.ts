@@ -24,8 +24,55 @@ describe("/kits", () => {
       };
 
       const response = await app.server.inject(request);
-      console.log(response.payload);
       expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring should have required property 'lat'"
+      );
+      done();
+    });
+
+    it("Should respond with an error if lon is missing from query", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: { pathname: "/kits", query: { lat: "50", radius: "1000" } },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring should have required property 'lon'"
+      );
+      done();
+    });
+
+    it("Should respond with an error if radius is missing from query", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: { pathname: "/kits", query: { lon: "50", lat: "50" } },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring should have required property 'radius'"
+      );
+      done();
+    });
+
+    it("Should respond with an error if lat less than minimum value", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lat: "-181", lon: "50", radius: "1000" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(400);
+      expect(JSON.parse(response.payload).message).toEqual(
+        "querystring.lat should be >= -90"
+      );
       done();
     });
   });
