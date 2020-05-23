@@ -50,4 +50,7 @@ export class Kits {
     ];
     return kits.aggregate(pipeline);
   }
+  public static collection(): Collection<Kit> {
+    return kits;
+  }
 }

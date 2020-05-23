@@ -7,9 +7,14 @@ import { HealthCheckRoute } from "./routes/healthcheck.route";
 // plugins
 import fastifyBlipp from "fastify-blipp";
 import fastifyHelmet from "fastify-helmet";
-import fastifyMongodb from "fastify-mongodb";
+import fastifyMongodb, { FastifyMongodbOptions } from "fastify-mongodb";
 // DAO
 import { Kits } from "./DAO/Kits.dao";
+
+// extend the type to insert additional options
+interface ConnectionOptions extends FastifyMongodbOptions {
+  keepAlive: boolean;
+}
 
 export class App {
   server: fastify.FastifyInstance<
@@ -33,13 +38,16 @@ export class App {
       this.server.log.error(`Could not register plugins. Error: ${err}`);
       process.exit(1);
     }
+    this.regiserRoutes();
 
-    try {
-      this.regiserRoutes();
-    } catch (err) {
-      this.server.log.error(`Could not register routes. Error: ${err}`);
-      process.exit(1);
-    }
+    // Prevent whole error stack from being sent back as response.
+    this.server.setErrorHandler(function (error, request, reply) {
+      if (error.validation) {
+        reply.status(400).send(error);
+        return;
+      }
+      reply.status(500).send("Server Error");
+    });
   }
 
   public registerPlugins(): void {
@@ -50,16 +58,20 @@ export class App {
       noCache: false,
       referrerPolicy: true,
     });
+
     // mongodb
-    this.server.register(fastifyMongodb, {
-      forceClose: true,
+    const dbOptions: ConnectionOptions = {
       url: secrets.db_url,
+      forceClose: true,
       database: "naloxone",
-    });
+      keepAlive: true,
+    };
+    this.server.register(fastifyMongodb, dbOptions);
   }
 
   public regiserRoutes(): void {
     this.server.route(HealthCheckRoute);
+    this.server.route(GetKitsRoute);
   }
 
   public listen(): void {
@@ -75,7 +87,6 @@ export class App {
   }
 
   public injectDB(): void {
-    // This typeguard is just to please typescript compiler.
     if (!this.server.mongo.db) throw new Error("No database connection");
     const kitsColl = this.server.mongo.db.collection("kits");
     Kits.injectDB(kitsColl);

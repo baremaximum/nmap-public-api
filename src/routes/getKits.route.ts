@@ -8,11 +8,17 @@ export const GetKitsRoute: RouteOptions = {
   schema: {
     querystring: {
       required: ["lon", "lat", "radius"],
-      lon: { type: "number", minValue: -180, maxValue: 180 },
-      lat: { type: "number", minValue: -90, maxValue: 90 },
-      radius: { type: "number", maxValue: 5000, minValue: 100 },
+      type: "object",
+      properties: {
+        lon: { type: "number", minimum: -180, maximum: 180 },
+        lat: { type: "number", minValue: -90, maximum: 90 },
+        radius: { type: "number", minimum: 100, maximum: 2500 },
+      },
     },
     response: {
+      400: {
+        type: "object",
+      },
       404: {
         type: "string",
       },
@@ -27,29 +33,28 @@ export const GetKitsRoute: RouteOptions = {
             location: {
               type: "object",
               properties: {
-                city: "string",
-                type: "string",
+                city: { type: "string" },
                 coordinates: {
                   type: "array",
                   items: { type: "number" },
                 },
-                address: "string",
-                postalZip: "string",
-                country: "string",
-                provinceState: "string",
+                address: { type: "string" },
+                postalZip: { type: "string" },
+                country: { type: "string" },
+                provinceState: { type: "string" },
               },
             },
-            lastVerified: "date",
-            openingHours: "string",
-            organizationName: "string",
-            upToDate: "boolean",
+            lastVerified: { type: "string", format: "date-time" },
+            openingHours: { type: "string" },
+            organizationName: { type: "string" },
+            upToDate: { type: "boolean" },
             notes: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
-                  locale: "string",
-                  content: "string",
+                  locale: { type: "string" },
+                  content: { type: "string" },
                 },
               },
             },
