@@ -2,7 +2,6 @@ import { Kits, Kit } from "../src/DAO/Kits.dao";
 import { App } from "../src/App";
 import { HTTPInjectOptions } from "fastify";
 import fs from "fs";
-import { parse } from "querystring";
 
 describe("/kits", () => {
   let app = new App();
@@ -276,6 +275,28 @@ describe("/kits", () => {
       expect(response.body).toEqual(
         "There are no kits within the specified radius of that location."
       );
+      done();
+    });
+
+    it("Should return a server error if an exception occurs", async (done) => {
+      // Fake a mongodb error
+      const mockGet = jest.spyOn(Kits, "getByCoordinates");
+      mockGet.mockImplementation(() => {
+        throw new Error("Fake error");
+      });
+      const lat = "-73.59";
+      const lon = "45.52";
+      const radius = "3000";
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lon: lon, lat: lat, radius: radius },
+        },
+      };
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(500);
+      expect(response.body).toEqual("Server error");
       done();
     });
   });
