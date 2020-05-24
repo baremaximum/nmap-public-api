@@ -1,8 +1,13 @@
 import { Collection, AggregationCursor } from "mongodb";
 
 export interface Location {
-  type: string; // Point. GEOjson field.
-  coordinates: [number, number];
+  point: {
+    type: string; // Point. GEOjson field.
+    coordinates: {
+      lon: number;
+      lat: number;
+    };
+  };
   address: string;
   city: string;
   postalZip: string;
@@ -38,7 +43,6 @@ export class Kits {
     radiusMeters: number
   ): AggregationCursor<Kit> {
     /* Finds all kits whose location is within specified radius of the specified point.*/
-
     const pipeline = [
       {
         $geoNear: {
@@ -46,12 +50,13 @@ export class Kits {
           distanceField: "dist.calculated",
           query: { upToDate: true },
           maxDistance: radiusMeters,
+          spherical: true,
         },
       },
     ];
     return kits.aggregate(pipeline);
   }
-  public static collection(): Collection<Kit> {
+  public static get collection(): Collection<Kit> {
     return kits;
   }
 }

@@ -12,7 +12,7 @@ export const GetKitsRoute: RouteOptions = {
       properties: {
         lon: { type: "number", minimum: -180, maximum: 180 },
         lat: { type: "number", minimum: -90, maximum: 90 },
-        radius: { type: "number", minimum: 100, maximum: 1500 },
+        radius: { type: "number", minimum: 100, maximum: 3000 },
       },
     },
     response: {
@@ -30,13 +30,23 @@ export const GetKitsRoute: RouteOptions = {
         items: {
           type: "object",
           properties: {
+            _id: { type: "string" },
             location: {
               type: "object",
               properties: {
                 city: { type: "string" },
-                coordinates: {
-                  type: "array",
-                  items: { type: "number" },
+                point: {
+                  type: "object",
+                  properties: {
+                    type: { type: "string" },
+                    coordinates: {
+                      type: "object",
+                      properties: {
+                        lon: { type: "string" },
+                        lat: { type: "string" },
+                      },
+                    },
+                  },
                 },
                 address: { type: "string" },
                 postalZip: { type: "string" },

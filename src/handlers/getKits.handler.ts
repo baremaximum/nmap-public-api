@@ -7,16 +7,18 @@ export async function getKitsHandler(
   response: FastifyReply<ServerResponse>
 ) {
   // latitude, longitude, and radius extracted from request query
-  const { lon, lat, radiusMeters } = request.query;
+  const { lon, lat, radius } = request.query;
   try {
-    const kits = await Kits.getByCoordinates(lon, lat, radiusMeters).toArray();
+    const kits = await Kits.getByCoordinates(lon, lat, radius).toArray();
     // If there are kits, send them.
     if (kits.length > 0) {
       response.status(200).send(kits);
     } else {
       response
         .status(404)
-        .send("There are no kits within 500 meters of that location.");
+        .send(
+          "There are no kits within the specified radius of that location."
+        );
     }
   } catch (e) {
     // Catch and log mongodb errors.
