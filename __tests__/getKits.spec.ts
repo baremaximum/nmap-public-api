@@ -261,5 +261,22 @@ describe("/kits", () => {
 
       done();
     });
+
+    it("should return with 404 status if query is valid, but no kits nearby", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lon: "50", lat: "50", radius: "2000" },
+        },
+      };
+
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(404);
+      expect(response.body).toEqual(
+        "There are no kits within the specified radius of that location."
+      );
+      done();
+    });
   });
 });
