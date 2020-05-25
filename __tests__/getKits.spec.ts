@@ -180,6 +180,7 @@ describe("/kits", () => {
       // GeoNear query only works if there is a spatial index on the collection
       await Kits.collection.createIndex({
         "location.point.coordinates": "2dsphere",
+        upToDate: 1,
       });
     });
 

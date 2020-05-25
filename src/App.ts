@@ -51,7 +51,7 @@ export class App {
     });
   }
 
-  public registerPlugins(): void {
+  private registerPlugins(): void {
     // blipp
     this.server.register(fastifyBlipp);
     // helmet
@@ -70,7 +70,7 @@ export class App {
     this.server.register(fastifyMongodb, dbOptions);
   }
 
-  public regiserRoutes(): void {
+  private regiserRoutes(): void {
     this.server.route(HealthCheckRoute);
     this.server.route(GetKitsRoute);
   }

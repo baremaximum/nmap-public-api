@@ -5,7 +5,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 export async function getKitsHandler(
   request: FastifyRequest,
   response: FastifyReply<ServerResponse>
-) {
+): Promise<void> {
   // latitude, longitude, and radius extracted from request query
   const { lon, lat, radius } = request.query;
   try {
