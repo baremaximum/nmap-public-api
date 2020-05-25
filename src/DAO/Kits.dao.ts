@@ -1,4 +1,4 @@
-import { Collection, AggregationCursor } from "mongodb";
+import { Collection, AggregationCursor, Cursor } from "mongodb";
 
 export interface Location {
   point: {
@@ -35,6 +35,11 @@ export class Kits {
     if (!kits) {
       kits = coll;
     }
+  }
+
+  public static textSearch(query: string): Cursor<Kit> {
+    // Searches fields that are included in the text index of the collection.
+    return kits.find({ $text: { $search: query } });
   }
 
   public static getByCoordinates(
