@@ -6,14 +6,13 @@ export async function searchHandler(
   request: FastifyRequest,
   response: FastifyReply<ServerResponse>
 ): Promise<void> {
-  const { search } = request.query;
+  const { query } = request.query;
   try {
-    const result = await Kits.textSearch(search).toArray();
-
-    if (!result) {
-      response.status(404).send("No results matched specified query");
-    } else {
+    const result = await Kits.textSearch(query).toArray();
+    if (result.length > 0) {
       response.status(200).send(result);
+    } else {
+      response.status(404).send("No results matched specified query");
     }
   } catch (err) {
     // Mongodb errors

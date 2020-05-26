@@ -25,8 +25,8 @@ export const KitArrayResponseSchema = {
                 coordinates: {
                   type: "object",
                   properties: {
-                    lon: { type: "string" },
-                    lat: { type: "string" },
+                    lon: { type: "number", minimum: -90, maximum: 90 },
+                    lat: { type: "number", minimum: -180, maximum: 180 },
                   },
                 },
               },
@@ -38,9 +38,18 @@ export const KitArrayResponseSchema = {
           },
         },
         lastVerified: { type: "string", format: "date-time" },
-        openingHours: { type: "string" },
+        opensAt: { type: "string", format: "time" },
+        closesAt: { type: "string", format: "time" },
+        openOn: {
+          type: "array",
+          items: {
+            type: "integer",
+            minimum: 0,
+            maximum: 6,
+          },
+        },
+        expires: { type: "string", format: "date-time" },
         organizationName: { type: "string" },
-        upToDate: { type: "boolean" },
         notes: {
           type: "array",
           items: {

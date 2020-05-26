@@ -39,7 +39,11 @@ export class Kits {
 
   public static textSearch(query: string): Cursor<Kit> {
     // Searches fields that are included in the text index of the collection.
-    return kits.find({ $text: { $search: query } });
+    return kits
+      .find({ $text: { $search: query } })
+      .project({ score: { $meta: "textScore" } })
+      .sort({ score: { $meta: "textScore" } })
+      .collation({ locale: "en", strength: 1 });
   }
 
   public static getByCoordinates(

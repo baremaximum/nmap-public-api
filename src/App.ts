@@ -10,6 +10,7 @@ import fastifyHelmet from "fastify-helmet";
 import fastifyMongodb, { FastifyMongodbOptions } from "fastify-mongodb";
 // DAO
 import { Kits } from "./DAO/Kits.dao";
+import { SearchRoute } from "./routes/search.route";
 
 // extend the type to insert additional options
 interface ConnectionOptions extends FastifyMongodbOptions {
@@ -71,6 +72,7 @@ export class App {
   }
 
   private regiserRoutes(): void {
+    this.server.route(SearchRoute);
     this.server.route(HealthCheckRoute);
     this.server.route(GetKitsRoute);
   }
