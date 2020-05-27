@@ -31,7 +31,6 @@ describe("/search", () => {
 
   describe("With data", () => {
     beforeAll(async () => {
-      console.log(KitFaker.data);
       // let data: Kit[] = JSON.parse(
       //   fs.readFileSync("./MOCK_DATA.json", { encoding: "utf-8" })
       // );

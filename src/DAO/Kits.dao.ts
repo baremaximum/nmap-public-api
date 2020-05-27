@@ -1,8 +1,18 @@
 import { Collection, AggregationCursor, Cursor } from "mongodb";
 
+export enum Weekday {
+  Sunday = 0,
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
+}
+
 export interface Location {
   point: {
-    type: string; // Point. GEOjson field.
+    type: string; // Point. GEOjson field requirement.
     coordinates: {
       lon: number;
       lat: number;
@@ -19,9 +29,11 @@ export interface Kit {
   _id: string;
   location: Location;
   lastVerified: Date;
-  openingHours: string;
+  opensAt: string; // time
+  closesAt: string; // time
+  openOn: [Weekday];
   organizationName: string;
-  upToDate: boolean;
+  expires: Date;
   notes?: [{ locale: string; content: string }];
 }
 
@@ -41,9 +53,9 @@ export class Kits {
     // Searches fields that are included in the text index of the collection.
     return kits
       .find({ $text: { $search: query } })
-      .project({ score: { $meta: "textScore" } })
+      .project({ score: { $meta: "textScore" } }) // Allow ordering of results by relevance
       .sort({ score: { $meta: "textScore" } })
-      .collation({ locale: "en", strength: 1 });
+      .collation({ locale: "en", strength: 1 }); // Makes search insensitive to diacritics
   }
 
   public static getByCoordinates(
@@ -57,7 +69,7 @@ export class Kits {
         $geoNear: {
           near: { type: "Point", coordinates: [lon, lat] },
           distanceField: "dist.calculated",
-          query: { upToDate: true },
+          query: { expires: { $gt: new Date().toISOString() } },
           maxDistance: radiusMeters,
           spherical: true,
         },
