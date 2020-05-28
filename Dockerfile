@@ -8,7 +8,6 @@ RUN apk add --no-cache libcurl
 
 ARG NODE_ENV=production
 ARG LOG_LEVEL=warn
-ARG DOMAIN=0.0.0.0
 ARG PORT=3000
 # Should usually stay 0.0.0.0 because of the way fastify and Docker interact.
 ARG HOST=0.0.0.0
@@ -20,7 +19,7 @@ ENV NODE_ENV=${NODE_ENV} \
   HOST=${HOST} \
   PORT=${PORT} 
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD [ "curl", "${DOMAIN}:${PORT}/healthz"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD [ "curl", "${HOST}:${PORT}/healthz"]
 
 COPY package.json package.json
 
