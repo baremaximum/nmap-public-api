@@ -167,12 +167,7 @@ describe("/kits", () => {
     let data: Kit[];
 
     beforeAll(async () => {
-      data = await KitFaker.data;
-      // Generate our own coordinates due to bug in faker.
-      data.map((item: Kit) => {
-        item.location.point.coordinates = KitFaker.randCoords;
-        return item;
-      });
+      data = await KitFaker.data();
       // Insert fake data into DB.
       await Kits.collection.insertMany(data);
       // GeoNear query only works if there is a spatial index on the collection
@@ -228,63 +223,85 @@ describe("/kits", () => {
         }
       });
 
+      // Test that respnse had right status code and number of items.
       const response = await app.server.inject(request);
       expect(response.statusCode).toEqual(200);
       const respObj = response.json();
+      // First 3 fake records are expired.
+      expect(respObj.length).toEqual(data.length - 3);
       expect(respObj.length).toEqual(counter);
 
+      // Test that each item in the response had the required propreties,
+      // and values were of correct type
       respObj.forEach((kit: any) => {
-        for (let prop in KitFaker.typesObject) {
+        for (let prop in KitFaker.kitTypesObject) {
           expect(kit.hasOwnProperty(prop)).toBe(true);
 
-          if (KitFaker.typesObject[prop] !== "array") {
-            expect(typeof kit[prop]).toEqual(KitFaker.typesObject[prop]);
+          if (KitFaker.kitTypesObject[prop] !== "array") {
+            expect(typeof kit[prop]).toEqual(KitFaker.kitTypesObject[prop]);
           } else {
             expect(kit[prop] instanceof Array).toBe(true);
           }
+        }
+
+        for (let locProp in KitFaker.locationTypesObject) {
+          expect(kit.location.hasOwnProperty(locProp)).toBe(true);
+          expect(typeof kit.location[locProp]).toEqual(
+            KitFaker.locationTypesObject[locProp]
+          );
+        }
+
+        for (let noteProp in KitFaker.notesTypesObject) {
+          kit.notes.forEach((note: any) => {
+            expect(note.hasOwnProperty(noteProp)).toBe(true);
+            expect(typeof note[noteProp]).toEqual(
+              KitFaker.notesTypesObject[noteProp]
+            );
+          });
         }
       });
 
       done();
     });
 
-    // it("should return with 404 status if query is valid, but no kits nearby", async (done) => {
-    //   const request: HTTPInjectOptions = {
-    //     method: "GET",
-    //     url: {
-    //       pathname: "/kits",
-    //       query: { lon: "50", lat: "50", radius: "2000" },
-    //     },
-    //   };
+    it("should return with 404 status if query is valid, but no kits nearby", async (done) => {
+      // Query params must be outside of min/max values set in data faker.
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lon: "50", lat: "50", radius: "2000" },
+        },
+      };
 
-    //   const response = await app.server.inject(request);
-    //   expect(response.statusCode).toEqual(404);
-    //   expect(response.body).toEqual(
-    //     "There are no kits within the specified radius of that location."
-    //   );
-    //   done();
-    // });
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(404);
+      expect(response.body).toEqual(
+        "There are no kits within the specified radius of that location."
+      );
+      done();
+    });
 
-    // it("Should return a server error if an exception occurs", async (done) => {
-    //   // Fake a mongodb error
-    //   const mockGet = jest.spyOn(Kits, "getByCoordinates");
-    //   mockGet.mockImplementation(() => {
-    //     throw new Error("Fake error");
-    //   });
-    //   const lat = "-73.59";
-    //   const lon = "45.52";
-    //   const radius = "3000";
-    //   const request: HTTPInjectOptions = {
-    //     method: "GET",
-    //     url: {
-    //       pathname: "/kits",
-    //       query: { lon: lon, lat: lat, radius: radius },
-    //     },
-    //   };
-    //   const response = await app.server.inject(request);
-    //   expect(response.statusCode).toEqual(500);
-    //   expect(response.body).toEqual("Server error");
-    //   done();
-    // });
+    it("Should return a server error if an exception occurs", async (done) => {
+      // Fake a mongodb error
+      const mockGet = jest.spyOn(Kits, "getByCoordinates");
+      mockGet.mockImplementation(() => {
+        throw new Error("Fake error");
+      });
+      const lat = "-73.59";
+      const lon = "45.52";
+      const radius = "3000";
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/kits",
+          query: { lon: lon, lat: lat, radius: radius },
+        },
+      };
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(500);
+      expect(response.body).toEqual("Server error");
+      done();
+    });
   });
 });

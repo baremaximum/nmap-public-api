@@ -30,57 +30,99 @@ describe("/search", () => {
   });
 
   describe("With data", () => {
+    let data: Kit[];
+
     beforeAll(async () => {
-      // let data: Kit[] = JSON.parse(
-      //   fs.readFileSync("./MOCK_DATA.json", { encoding: "utf-8" })
-      // );
-      // // Insert mock data
-      // await Kits.collection.insertMany(data);
-      // // GeoNear query only works if there is a spatial index on the collection
-      // await Kits.collection.createIndex({
-      //   organizationName: "text",
-      //   "location.address": "text",
-      //   "Location.city": "text",
-      //   "location.provinceState": "text",
-      // });
+      data = await KitFaker.data();
+      // Insert mock data
+      await Kits.collection.insertMany(data);
+      // GeoNear query only works if there is a spatial index on the collection
+      await Kits.collection.createIndex({
+        organizationName: "text",
+        "location.address": "text",
+        "Location.city": "text",
+        "location.provinceState": "text",
+      });
     });
 
     afterAll(async () => {
       await Kits.collection.drop();
     });
-    it("IS A DUMMY", async (done) => {
+
+    it("should return correctly ordered kits", async (done) => {
+      const name = data[0].organizationName;
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: { pathname: "/search", query: { query: name } },
+      };
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(200);
+      const respData = response.json();
+      // If search results are correctly ordered, first result should
+      // be the one that the query was copied from.
+      expect(respData[0].organizationName).toEqual(name);
+
+      // Test that each item in the response had the required propreties,
+      // and values were of correct type
+      respData.forEach((kit: any) => {
+        for (let prop in KitFaker.kitTypesObject) {
+          expect(kit.hasOwnProperty(prop)).toBe(true);
+
+          if (KitFaker.kitTypesObject[prop] !== "array") {
+            expect(typeof kit[prop]).toEqual(KitFaker.kitTypesObject[prop]);
+          } else {
+            expect(kit[prop] instanceof Array).toBe(true);
+          }
+        }
+
+        for (let locProp in KitFaker.locationTypesObject) {
+          expect(kit.location.hasOwnProperty(locProp)).toBe(true);
+          expect(typeof kit.location[locProp]).toEqual(
+            KitFaker.locationTypesObject[locProp]
+          );
+        }
+
+        for (let noteProp in KitFaker.notesTypesObject) {
+          kit.notes.forEach((note: any) => {
+            expect(note.hasOwnProperty(noteProp)).toBe(true);
+            expect(typeof note[noteProp]).toEqual(
+              KitFaker.notesTypesObject[noteProp]
+            );
+          });
+        }
+      });
       done();
     });
 
-    // it("should return correctly ordered kits", async (done) => {
-    //   // Duplicate needed to get around typescript scoping issue.
-    //   const jsonData = JSON.parse(
-    //     fs.readFileSync("./MOCK_DATA.json", { encoding: "utf-8" })
-    //   );
+    it("should ignore diacritics when performing text search", async (done) => {
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: { pathname: "/search", query: { query: "Quebec" } },
+      };
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(200);
+      const data = response.json();
+      expect(data.length > 0).toBe(true);
+      done();
+    });
 
-    //   const name = jsonData[0].organizationName;
-    //   const request: HTTPInjectOptions = {
-    //     method: "GET",
-    //     url: { pathname: "/search", query: { query: name } },
-    //   };
-    //   const response = await app.server.inject(request);
-    //   const data = response.json();
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(data[0].organizationName).toEqual(name);
-    //   done();
-    // });
-
-    // it("should ignore diacritics when performing text search", async (done) => {
-    //   const request: HTTPInjectOptions = {
-    //     method: "GET",
-    //     url: { pathname: "/search", query: { query: "Quebec" } },
-    //   };
-    //   const response = await app.server.inject(request);
-    //   const data = response.json();
-
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(data.length).toEqual(14);
-    //   done();
-    // });
+    it("Should return a server error if an exception occurs", async (done) => {
+      // Fake a mongodb error
+      const mockGet = jest.spyOn(Kits, "textSearch");
+      mockGet.mockImplementation(() => {
+        throw new Error("Fake error");
+      });
+      const request: HTTPInjectOptions = {
+        method: "GET",
+        url: {
+          pathname: "/search",
+          query: { query: "Quebec" },
+        },
+      };
+      const response = await app.server.inject(request);
+      expect(response.statusCode).toEqual(500);
+      expect(response.body).toEqual("Server error");
+      done();
+    });
   });
 });

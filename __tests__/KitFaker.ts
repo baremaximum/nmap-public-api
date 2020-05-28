@@ -1,6 +1,7 @@
 import { JSONSchema } from "fastify";
 import { KitArrayResponseSchema } from "../src/schemas/kitArrayResponse.schema";
-
+import { Kit } from "../src/DAO/Kits.dao";
+// library doesn't have a types file. need to use CommonJS style import.
 const jsf = require("json-schema-faker");
 
 export class KitFaker {
@@ -13,10 +14,22 @@ export class KitFaker {
 
   private static schema: any = Object.assign({}, KitArrayResponseSchema[200]);
 
-  public static get data() {
+  public static async data(): Promise<Kit[]> {
     // json-schema-faker requires this setup.
     jsf.extend("faker", () => require("faker"));
-    return jsf.resolve(this.addFakers);
+    const data = await jsf.resolve(this.addFakers);
+    // Generate our own coordinates due to bug in faker.
+    data.map((item: Kit, index: number) => {
+      // Some of the fake data should be expired.
+      if (index < 3) {
+        let date = new Date();
+        date.setMonth(date.getMonth() - 3);
+        item.expires = date;
+      }
+      item.location.point.coordinates = KitFaker.randCoords;
+      return item;
+    });
+    return data;
   }
 
   private static get addFakers(): JSONSchema {
@@ -24,7 +37,6 @@ export class KitFaker {
     this.schema.minItems = 30;
     const location = props.location.properties;
     const point = location.point.properties;
-    const coordinates = point.coordinates.properties;
 
     // Make expiration date in the future
     const newDate = new Date();
@@ -52,18 +64,32 @@ export class KitFaker {
     };
   }
 
-  public static get typesObject(): { [key: string]: string } {
+  private static makeTypesObj(properties: { [key: string]: any }) {
     /*
      * Create a set of key, value pairs that describes the expected properties
-     * of a Kit, and the expected type of each property.
+     * of an object, and the expected type of each property.
      *
      * Used in tests to verify that endpoints return data with correct structure.
      */
-    const properties = this.schema.items.properties;
     let tar = {};
     for (let prop in properties) {
       tar = { ...tar, ...{ [prop]: properties[prop].type } };
     }
     return tar;
+  }
+
+  public static get kitTypesObject(): { [key: string]: string } {
+    const properties = this.schema.items.properties;
+    return this.makeTypesObj(properties);
+  }
+
+  public static get locationTypesObject(): { [key: string]: string } {
+    const properties = this.schema.items.properties.location.properties;
+    return this.makeTypesObj(properties);
+  }
+
+  public static get notesTypesObject(): { [key: string]: string } {
+    const properties = this.schema.items.properties.notes.items.properties;
+    return this.makeTypesObj(properties);
   }
 }

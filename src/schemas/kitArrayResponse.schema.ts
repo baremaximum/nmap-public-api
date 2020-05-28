@@ -77,6 +77,7 @@ export const KitArrayResponseSchema = {
           type: "array",
           items: {
             type: "object",
+            required: ["locale", "content"],
             properties: {
               locale: { type: "string" },
               content: { type: "string" },
