@@ -1,4 +1,5 @@
 # nmap-public-api
+**THIS PACKAGE IS DEPRECATED**
 
 Public facing data api for the naloxone map project.
 
